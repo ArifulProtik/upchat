@@ -106,4 +106,3 @@ cd ui && bun install && bun run dev
 - [shadcn-svelte](https://www.shadcn-svelte.com/)
 - [Zod](https://zod.dev/)
 - [bits-ui](https://www.bits-ui.com/)
-- [sveltekit-superforms](https://superforms.rocks/)
