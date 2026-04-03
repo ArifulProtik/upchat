@@ -21,7 +21,6 @@ type Server struct {
 }
 
 func New(config *Config) *Server {
-
 	engine := gin.Default()
 	engine.Use(cors.Default())
 	route := engine.Group("/api")
@@ -39,7 +38,8 @@ func (s *Server) Run() {
 		Handler: s.engine.Handler(),
 	}
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil &&
+			err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
@@ -48,10 +48,14 @@ func (s *Server) Run() {
 	signal.Notify(quite, syscall.SIGINT, syscall.SIGTERM)
 	<-quite
 	log.Println("Shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	timeout := 5
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		time.Duration(timeout)*time.Second,
+	)
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
+	defer cancel()
 	log.Println("Server exited")
 }

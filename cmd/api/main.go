@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
+	"log"
+	"log/slog"
+	"os"
+
 	"ArifulProtik/UpChat/internal"
 	"ArifulProtik/UpChat/internal/controller"
 	"ArifulProtik/UpChat/internal/ent"
 	"ArifulProtik/UpChat/internal/ent/migrate"
 	"ArifulProtik/UpChat/internal/service"
-	"context"
-	"log"
-	"log/slog"
-	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -24,7 +25,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("[main] Failed to open database: %v", err)
 	}
-	if err := dbClient.Schema.Create(ctx, migrate.WithDropIndex(true), migrate.WithDropColumn(true)); err != nil {
+	err = dbClient.Schema.Create(
+		ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	)
+	if err != nil {
 		log.Fatalf("[main] Failed to create schema: %v", err)
 	}
 	logHandler := slog.HandlerOptions{

@@ -22,7 +22,9 @@ func (Account) Mixin() []ent.Mixin {
 func (Account) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("user_id").Unique().NotEmpty(),
-		field.Enum("provider").Values("google", "github", "email", "apple").Default("email"),
+		field.Enum("provider").
+			Values("google", "github", "email", "apple").
+			Default("email"),
 		field.String("email").Unique().NotEmpty(),
 		field.String("password").Sensitive().NotEmpty(),
 		field.Bool("mail_verified").Default(false),
