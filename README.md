@@ -1,6 +1,6 @@
 # UpChat
 
-> A free AI chat application that gives you access to multiple LLM models in one place. Chat with any AI model, share your conversations publicly, or keep them private.
+> A free AI chat application that gives you access to multiple free LLM models in one place. Chat with any AI model, share your conversations publicly, or keep them private.
 
 ## Project Overview
 
@@ -73,17 +73,11 @@ Or run separately:
 
 ```bash
 # Terminal 1 - Backend
-make dev
+make run
 
 # Terminal 2 - Frontend
 cd ui && bun install && bun run dev
 ```
-
-### 4. Access
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8081
-- **Health Check**: http://localhost:8081/api/health
 
 ## Development Commands
 
