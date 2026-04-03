@@ -1,42 +1,58 @@
-# sv
+# UpChat UI
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The frontend for UpChat - an AI chat application built with SvelteKit 5.
 
-## Creating a project
+## Tech Stack
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **SvelteKit 5** - Full-stack framework with runes mode
+- **TypeScript** - Type safety (strict mode)
+- **TailwindCSS v4** - Utility-first CSS with OKLCH color system
+- **shadcn-svelte** - UI component library (36+ components)
+- **Zod v4** - Runtime schema validation
+- **bits-ui** - Headless UI primitives
+- **sveltekit-superforms** - Form handling
+- **svelte-sonner** - Toast notifications
 
-```sh
-# create a new project
-npx sv create my-app
+## Prerequisites
+
+- Node.js 18+
+- Bun (recommended) or npm/yarn/pnpm
+
+## How to Run
+
+### Install Dependencies
+
+```bash
+bun install
 ```
 
-To recreate this project with the same configuration:
+### Development
 
-```sh
-# recreate this project
-bun x sv@0.13.1 create --template minimal --types ts --add eslint prettier tailwindcss="plugins:typography,forms" --install bun upchat
+```bash
+bun run dev       # Starts on http://localhost:3000
 ```
 
-## Developing
+### Production Build
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+bun run build     # Build for production
+bun run preview   # Preview the production build
 ```
 
-## Building
+### Code Quality
 
-To create a production version of your app:
-
-```sh
-npm run build
+```bash
+bun run check     # Type check (svelte-check)
+bun run lint      # ESLint + Prettier check
+bun run format    # Auto-format with Prettier
 ```
 
-You can preview the production build with `npm run preview`.
+## Documentation References
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- [SvelteKit Docs](https://svelte.dev/docs/kit)
+- [Svelte 5 Runes](https://svelte.dev/docs/svelte/runes)
+- [TailwindCSS v4](https://tailwindcss.com/docs)
+- [shadcn-svelte](https://www.shadcn-svelte.com/)
+- [Zod Documentation](https://zod.dev/)
+- [bits-ui](https://www.bits-ui.com/)
+- [sveltekit-superforms](https://superforms.rocks/)
