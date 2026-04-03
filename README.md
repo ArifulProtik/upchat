@@ -57,13 +57,7 @@ DATABASE_DRIVER=postgres
 PORT=8081
 ```
 
-### 2. Create Database
-
-```bash
-createdb upchat
-```
-
-### 3. Start Everything
+### 2. Start Everything
 
 ```bash
 make dev          # Runs backend (air) + frontend (bun dev) together
