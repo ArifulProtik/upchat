@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>SvelteKit Chat</title>
+	<title>Home - UpChat</title>
 </svelte:head>
 
 <button class="text-2xl font-bold text-red-800" onclick={() => count++}>
