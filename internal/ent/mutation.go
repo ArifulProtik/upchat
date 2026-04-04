@@ -1566,9 +1566,9 @@ type UserMutation struct {
 	_Name          *string
 	image_url      *string
 	email          *string
+	role           *user.Role
 	clearedFields  map[string]struct{}
-	account        map[string]struct{}
-	removedaccount map[string]struct{}
+	account        *string
 	clearedaccount bool
 	done           bool
 	oldValue       func(context.Context) (*User, error)
@@ -1872,14 +1872,45 @@ func (m *UserMutation) ResetEmail() {
 	m.email = nil
 }
 
-// AddAccountIDs adds the "account" edge to the Account entity by ids.
-func (m *UserMutation) AddAccountIDs(ids ...string) {
-	if m.account == nil {
-		m.account = make(map[string]struct{})
+// SetRole sets the "role" field.
+func (m *UserMutation) SetRole(u user.Role) {
+	m.role = &u
+}
+
+// Role returns the value of the "role" field in the mutation.
+func (m *UserMutation) Role() (r user.Role, exists bool) {
+	v := m.role
+	if v == nil {
+		return
 	}
-	for i := range ids {
-		m.account[ids[i]] = struct{}{}
+	return *v, true
+}
+
+// OldRole returns the old "role" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldRole(ctx context.Context) (v user.Role, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRole is only allowed on UpdateOne operations")
 	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRole requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRole: %w", err)
+	}
+	return oldValue.Role, nil
+}
+
+// ResetRole resets all changes to the "role" field.
+func (m *UserMutation) ResetRole() {
+	m.role = nil
+}
+
+// SetAccountID sets the "account" edge to the Account entity by id.
+func (m *UserMutation) SetAccountID(id string) {
+	m.account = &id
 }
 
 // ClearAccount clears the "account" edge to the Account entity.
@@ -1892,29 +1923,20 @@ func (m *UserMutation) AccountCleared() bool {
 	return m.clearedaccount
 }
 
-// RemoveAccountIDs removes the "account" edge to the Account entity by IDs.
-func (m *UserMutation) RemoveAccountIDs(ids ...string) {
-	if m.removedaccount == nil {
-		m.removedaccount = make(map[string]struct{})
-	}
-	for i := range ids {
-		delete(m.account, ids[i])
-		m.removedaccount[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedAccount returns the removed IDs of the "account" edge to the Account entity.
-func (m *UserMutation) RemovedAccountIDs() (ids []string) {
-	for id := range m.removedaccount {
-		ids = append(ids, id)
+// AccountID returns the "account" edge ID in the mutation.
+func (m *UserMutation) AccountID() (id string, exists bool) {
+	if m.account != nil {
+		return *m.account, true
 	}
 	return
 }
 
 // AccountIDs returns the "account" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AccountID instead. It exists only for internal usage by the builders.
 func (m *UserMutation) AccountIDs() (ids []string) {
-	for id := range m.account {
-		ids = append(ids, id)
+	if id := m.account; id != nil {
+		ids = append(ids, *id)
 	}
 	return
 }
@@ -1923,7 +1945,6 @@ func (m *UserMutation) AccountIDs() (ids []string) {
 func (m *UserMutation) ResetAccount() {
 	m.account = nil
 	m.clearedaccount = false
-	m.removedaccount = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -1960,7 +1981,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -1975,6 +1996,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.email != nil {
 		fields = append(fields, user.FieldEmail)
+	}
+	if m.role != nil {
+		fields = append(fields, user.FieldRole)
 	}
 	return fields
 }
@@ -1994,6 +2018,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageURL()
 	case user.FieldEmail:
 		return m.Email()
+	case user.FieldRole:
+		return m.Role()
 	}
 	return nil, false
 }
@@ -2013,6 +2039,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldImageURL(ctx)
 	case user.FieldEmail:
 		return m.OldEmail(ctx)
+	case user.FieldRole:
+		return m.OldRole(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2056,6 +2084,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetEmail(v)
+		return nil
+	case user.FieldRole:
+		v, ok := value.(user.Role)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRole(v)
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
@@ -2130,6 +2165,9 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldEmail:
 		m.ResetEmail()
 		return nil
+	case user.FieldRole:
+		m.ResetRole()
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2148,11 +2186,9 @@ func (m *UserMutation) AddedEdges() []string {
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
 	case user.EdgeAccount:
-		ids := make([]ent.Value, 0, len(m.account))
-		for id := range m.account {
-			ids = append(ids, id)
+		if id := m.account; id != nil {
+			return []ent.Value{*id}
 		}
-		return ids
 	}
 	return nil
 }
@@ -2160,23 +2196,12 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.removedaccount != nil {
-		edges = append(edges, user.EdgeAccount)
-	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case user.EdgeAccount:
-		ids := make([]ent.Value, 0, len(m.removedaccount))
-		for id := range m.removedaccount {
-			ids = append(ids, id)
-		}
-		return ids
-	}
 	return nil
 }
 
@@ -2203,6 +2228,9 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
 	switch name {
+	case user.EdgeAccount:
+		m.ClearAccount()
+		return nil
 	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }

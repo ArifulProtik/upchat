@@ -75,7 +75,7 @@ func (_q *UserQuery) QueryAccount() *AccountQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(account.Table, account.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.AccountTable, user.AccountColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, user.AccountTable, user.AccountColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
@@ -394,9 +394,8 @@ func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		return nodes, nil
 	}
 	if query := _q.withAccount; query != nil {
-		if err := _q.loadAccount(ctx, query, nodes,
-			func(n *User) { n.Edges.Account = []*Account{} },
-			func(n *User, e *Account) { n.Edges.Account = append(n.Edges.Account, e) }); err != nil {
+		if err := _q.loadAccount(ctx, query, nodes, nil,
+			func(n *User, e *Account) { n.Edges.Account = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -409,9 +408,6 @@ func (_q *UserQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	if len(query.ctx.Fields) > 0 {
 		query.ctx.AppendFieldOnce(account.FieldUserID)

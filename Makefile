@@ -2,7 +2,7 @@
 BINARY_NAME=myapp
 GO_FILES=$(shell find . -type f -name '*.go')
 
-.PHONY: all dev generate build run schema test lint clean help
+.PHONY: all dev generate build run schema test lint clean help docs
 
 # Default target
 all: help
@@ -25,8 +25,8 @@ schema: ## Generate new ent schema (usage: make schema schema_name=User)
 test: ## Run unit tests with race detection
 	go test -v -race ./...
 
-lint: ## Run golangci-lint (requires installation)
-	golangci-lint run
+docs: ## Generate OpenAPI spec from annotations
+	go tool swag init -g cmd/api/main.go -o internal/docs/
 
 clean: ## Remove build artifacts
 	go clean
@@ -34,5 +34,3 @@ clean: ## Remove build artifacts
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
-
-

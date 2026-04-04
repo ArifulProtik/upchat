@@ -1,20 +1,29 @@
 package main
 
 import (
-	"context"
-	"log"
-	"log/slog"
-	"os"
-
 	"ArifulProtik/UpChat/internal"
 	"ArifulProtik/UpChat/internal/controller"
 	"ArifulProtik/UpChat/internal/ent"
 	"ArifulProtik/UpChat/internal/ent/migrate"
 	"ArifulProtik/UpChat/internal/service"
+	"context"
+	"log"
+	"log/slog"
+	"os"
+
+	_ "ArifulProtik/UpChat/internal/docs"
 
 	_ "github.com/lib/pq"
 )
 
+// @title						UpChat API Backend
+// @version					1.0
+// @description				API for UpChat - AI chat application
+// @BasePath					/api
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
+// @description				Enter "Bearer {token}"
 func main() {
 	ctx := context.Background()
 	config, err := internal.LoadConfig()
@@ -37,7 +46,7 @@ func main() {
 		AddSource: true,
 	}
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &logHandler))
-	newService := service.New(logger)
+	newService := service.New(logger, dbClient)
 	newController := controller.New(logger, newService)
 	server := internal.New(config)
 	internal.SetupRoutes(server.Route, newController)

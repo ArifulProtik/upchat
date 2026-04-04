@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"ArifulProtik/UpChat/internal/ent/account"
 	"ArifulProtik/UpChat/internal/ent/user"
 	"fmt"
 	"strings"
@@ -27,6 +28,8 @@ type User struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
+	// Role holds the value of the "role" field.
+	Role user.Role `json:"role,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges        UserEdges `json:"edges"`
@@ -36,17 +39,19 @@ type User struct {
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
 	// Account holds the value of the account edge.
-	Account []*Account `json:"account,omitempty"`
+	Account *Account `json:"account,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // AccountOrErr returns the Account value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) AccountOrErr() ([]*Account, error) {
-	if e.loadedTypes[0] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e UserEdges) AccountOrErr() (*Account, error) {
+	if e.Account != nil {
 		return e.Account, nil
+	} else if e.loadedTypes[0] {
+		return nil, &NotFoundError{label: account.Label}
 	}
 	return nil, &NotLoadedError{edge: "account"}
 }
@@ -56,7 +61,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldName, user.FieldImageURL, user.FieldEmail:
+		case user.FieldID, user.FieldName, user.FieldImageURL, user.FieldEmail, user.FieldRole:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedAt, user.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -110,6 +115,12 @@ func (_m *User) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
 				_m.Email = value.String
+			}
+		case user.FieldRole:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field role", values[i])
+			} else if value.Valid {
+				_m.Role = user.Role(value.String)
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -166,6 +177,9 @@ func (_m *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("email=")
 	builder.WriteString(_m.Email)
+	builder.WriteString(", ")
+	builder.WriteString("role=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Role))
 	builder.WriteByte(')')
 	return builder.String()
 }

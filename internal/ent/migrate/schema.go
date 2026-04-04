@@ -17,7 +17,7 @@ var (
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
 		{Name: "mail_verified", Type: field.TypeBool, Default: false},
-		{Name: "user_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString, Unique: true},
 	}
 	// AccountsTable holds the schema information for the "accounts" table.
 	AccountsTable = &schema.Table{
@@ -65,6 +65,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString, Nullable: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
+		{Name: "role", Type: field.TypeEnum, Enums: []string{"admin", "user"}, Default: "user"},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

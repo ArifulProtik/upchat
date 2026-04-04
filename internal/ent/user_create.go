@@ -75,6 +75,20 @@ func (_c *UserCreate) SetEmail(v string) *UserCreate {
 	return _c
 }
 
+// SetRole sets the "role" field.
+func (_c *UserCreate) SetRole(v user.Role) *UserCreate {
+	_c.mutation.SetRole(v)
+	return _c
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (_c *UserCreate) SetNillableRole(v *user.Role) *UserCreate {
+	if v != nil {
+		_c.SetRole(*v)
+	}
+	return _c
+}
+
 // SetID sets the "id" field.
 func (_c *UserCreate) SetID(v string) *UserCreate {
 	_c.mutation.SetID(v)
@@ -89,19 +103,23 @@ func (_c *UserCreate) SetNillableID(v *string) *UserCreate {
 	return _c
 }
 
-// AddAccountIDs adds the "account" edge to the Account entity by IDs.
-func (_c *UserCreate) AddAccountIDs(ids ...string) *UserCreate {
-	_c.mutation.AddAccountIDs(ids...)
+// SetAccountID sets the "account" edge to the Account entity by ID.
+func (_c *UserCreate) SetAccountID(id string) *UserCreate {
+	_c.mutation.SetAccountID(id)
 	return _c
 }
 
-// AddAccount adds the "account" edges to the Account entity.
-func (_c *UserCreate) AddAccount(v ...*Account) *UserCreate {
-	ids := make([]string, len(v))
-	for i := range v {
-		ids[i] = v[i].ID
+// SetNillableAccountID sets the "account" edge to the Account entity by ID if the given value is not nil.
+func (_c *UserCreate) SetNillableAccountID(id *string) *UserCreate {
+	if id != nil {
+		_c = _c.SetAccountID(*id)
 	}
-	return _c.AddAccountIDs(ids...)
+	return _c
+}
+
+// SetAccount sets the "account" edge to the Account entity.
+func (_c *UserCreate) SetAccount(v *Account) *UserCreate {
+	return _c.SetAccountID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -147,6 +165,10 @@ func (_c *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		_c.mutation.SetUpdatedAt(v)
 	}
+	if _, ok := _c.mutation.Role(); !ok {
+		v := user.DefaultRole
+		_c.mutation.SetRole(v)
+	}
 	if _, ok := _c.mutation.ID(); !ok {
 		v := user.DefaultID()
 		_c.mutation.SetID(v)
@@ -175,6 +197,14 @@ func (_c *UserCreate) check() error {
 	if v, ok := _c.mutation.Email(); ok {
 		if err := user.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "User.email": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Role(); !ok {
+		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
+	}
+	if v, ok := _c.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
 	return nil
@@ -232,9 +262,13 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec.SetField(user.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
+	if value, ok := _c.mutation.Role(); ok {
+		_spec.SetField(user.FieldRole, field.TypeEnum, value)
+		_node.Role = value
+	}
 	if nodes := _c.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   user.AccountTable,
 			Columns: []string{user.AccountColumn},

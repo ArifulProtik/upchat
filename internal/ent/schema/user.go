@@ -24,13 +24,14 @@ func (User) Fields() []ent.Field {
 		field.String("Name").NotEmpty(),
 		field.String("image_url").Optional(),
 		field.String("email").Unique().NotEmpty(),
+		field.Enum("role").Values("admin", "user").Default("user"),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("account", Account.Type).
+		edge.To("account", Account.Type).Unique().
 			Annotations(entsql.OnDelete(entsql.Cascade)),
 	}
 }
