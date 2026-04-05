@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 )
 
 // SignUp creates a new user account.
@@ -17,7 +18,7 @@ import (
 //	@Accept		json
 //	@Produce	json
 //	@Param		body	body		data.UserCreateBody	true	"User registration data"
-//	@Success	200		{object}	ent.User
+//	@Success	200		{object}	data.UserResponse
 //	@Failure	400		{object}	ErrorResponse
 //	@Failure	500		{object}	ErrorResponse
 //	@Router		/auth/signup [post]
@@ -48,7 +49,12 @@ func (c *Controller) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	var response data.UserResponse
+	if err := copier.Copy(&response, user); err != nil {
+		c.logger.Error("copier error", "error", err.Error())
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 // LogIn authenticates a user and returns a session token.
@@ -87,7 +93,7 @@ func (c *Controller) LogIn(ctx *gin.Context) {
 		})
 		return
 	}
-	loginResponse, err := c.service.Login(ctx.Request.Context(), account, body)
+	loginData, err := c.service.Login(ctx.Request.Context(), account, body)
 	if err != nil {
 		c.logger.Error("[Auth_Controller]", "error", err.Error())
 		ctx.JSON(http.StatusInternalServerError, &ErrorResponse{
@@ -95,6 +101,10 @@ func (c *Controller) LogIn(ctx *gin.Context) {
 			Error:  "Something went wrong",
 		})
 		return
+	}
+	var loginResponse data.LoginResponse
+	if err := copier.Copy(&loginResponse, loginData); err != nil {
+		c.logger.Error("copier error", "error", err.Error())
 	}
 	ctx.JSON(http.StatusOK, loginResponse)
 }
@@ -136,13 +146,14 @@ func (c *Controller) LogOut(ctx *gin.Context) {
 //	@Summary	Get current session
 //	@Tags		auth
 //	@Produce	json
-//	@Success	200	{object}	ent.User
+//	@Success	200	{object}	data.GetSessionResponse
 //	@Failure	500	{object}	ErrorResponse
 //	@Security	BearerAuth
 //	@Router		/auth/get-session [get]
 func (c *Controller) GetSession(ctx *gin.Context) {
 	user_id := ctx.MustGet(middleware.UserIDKey).(string)
-	userdata, err := c.service.FindUserByID(ctx.Request.Context(), user_id)
+	c.logger.Info(user_id)
+	userdata, err := c.service.FindAccountByID(ctx.Request.Context(), user_id)
 	if err != nil {
 		c.logger.Error("[Auth_Controller]", "error", err.Error())
 		ctx.JSON(http.StatusInternalServerError, &ErrorResponse{
@@ -151,5 +162,8 @@ func (c *Controller) GetSession(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, userdata.Unwrap())
+	ctx.JSON(http.StatusOK, &data.GetSessionResponse{
+		User:    Copy[data.UserResponse](userdata.Edges.User),
+		Account: Copy[data.AccountResponse](userdata),
+	})
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 )
 
 type Controller struct {
@@ -40,4 +41,12 @@ func (c *Controller) Health(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "OK",
 	})
+}
+
+func Copy[T any](fromt any) *T {
+	var to T
+	if err := copier.Copy(&to, fromt); err != nil {
+		return nil
+	}
+	return &to
 }

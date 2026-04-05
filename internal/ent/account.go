@@ -31,7 +31,7 @@ type Account struct {
 	// Password holds the value of the "password" field.
 	Password string `json:"-"`
 	// MailVerified holds the value of the "mail_verified" field.
-	MailVerified bool `json:"mail_verified,omitempty"`
+	MailVerified bool `json:"mail_verified"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AccountQuery when eager-loading is set.
 	Edges        AccountEdges `json:"edges"`

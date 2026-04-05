@@ -44,7 +44,7 @@ func (s *Service) Login(
 	ctx context.Context,
 	account *ent.Account,
 	body data.LoginBody,
-) (*data.LoginResponse, error) {
+) (*data.LoginData, error) {
 	token, err := s.GenerateToken()
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (s *Service) Login(
 	if err != nil {
 		return nil, err
 	}
-	return &data.LoginResponse{
+	return &data.LoginData{
 		Token: token,
 		User:  account.Edges.User,
 	}, nil

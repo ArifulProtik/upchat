@@ -33,7 +33,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.User"
+                            "$ref": "#/definitions/data.GetSessionResponse"
                         }
                     },
                     "500": {
@@ -156,7 +156,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ent.User"
+                            "$ref": "#/definitions/data.UserResponse"
                         }
                     },
                     "400": {
@@ -217,29 +217,34 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "account.Provider": {
-            "type": "string",
-            "enum": [
-                "email",
-                "google",
-                "github",
-                "email",
-                "apple"
-            ],
-            "x-enum-varnames": [
-                "DefaultProvider",
-                "ProviderGoogle",
-                "ProviderGithub",
-                "ProviderEmail",
-                "ProviderApple"
-            ]
-        },
         "controller.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {},
                 "status": {
                     "type": "integer"
+                }
+            }
+        },
+        "data.AccountResponse": {
+            "type": "object",
+            "properties": {
+                "mail_verified": {
+                    "type": "boolean"
+                },
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
+        "data.GetSessionResponse": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/data.AccountResponse"
+                },
+                "user": {
+                    "$ref": "#/definitions/data.UserResponse"
                 }
             }
         },
@@ -254,7 +259,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },
@@ -265,7 +271,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/ent.User"
+                    "$ref": "#/definitions/data.UserResponse"
                 }
             }
         },
@@ -284,199 +290,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },
-        "ent.Account": {
+        "data.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
                     "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the AccountQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.AccountEdges"
-                        }
-                    ]
                 },
                 "email": {
-                    "description": "Email holds the value of the \"email\" field.",
                     "type": "string"
                 },
                 "id": {
-                    "description": "ID of the ent.",
                     "type": "string"
                 },
-                "mail_verified": {
-                    "description": "MailVerified holds the value of the \"mail_verified\" field.",
-                    "type": "boolean"
-                },
-                "provider": {
-                    "description": "Provider holds the value of the \"provider\" field.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/account.Provider"
-                        }
-                    ]
-                },
-                "updated_at": {
-                    "description": "UpdatedAt holds the value of the \"updated_at\" field.",
-                    "type": "string"
-                },
-                "user_id": {
-                    "description": "UserID holds the value of the \"user_id\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.AccountEdges": {
-            "type": "object",
-            "properties": {
-                "sessions": {
-                    "description": "Sessions holds the value of the sessions edge.",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ent.Session"
-                    }
-                },
-                "user": {
-                    "description": "User holds the value of the user edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.User"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.Session": {
-            "type": "object",
-            "properties": {
-                "account_id": {
-                    "description": "AccountID holds the value of the \"account_id\" field.",
-                    "type": "string"
-                },
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the SessionQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.SessionEdges"
-                        }
-                    ]
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "ip_address": {
-                    "description": "IPAddress holds the value of the \"ip_address\" field.",
-                    "type": "string"
-                },
-                "token": {
-                    "description": "Token holds the value of the \"token\" field.",
+                "name": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "description": "UpdatedAt holds the value of the \"updated_at\" field.",
-                    "type": "string"
-                },
-                "user_agent": {
-                    "description": "UserAgent holds the value of the \"user_agent\" field.",
                     "type": "string"
                 }
             }
-        },
-        "ent.SessionEdges": {
-            "type": "object",
-            "properties": {
-                "owner": {
-                    "description": "Owner holds the value of the owner edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Account"
-                        }
-                    ]
-                }
-            }
-        },
-        "ent.User": {
-            "type": "object",
-            "properties": {
-                "Name": {
-                    "description": "Name holds the value of the \"Name\" field.",
-                    "type": "string"
-                },
-                "created_at": {
-                    "description": "CreatedAt holds the value of the \"created_at\" field.",
-                    "type": "string"
-                },
-                "edges": {
-                    "description": "Edges holds the relations/edges for other nodes in the graph.\nThe values are being populated by the UserQuery when eager-loading is set.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.UserEdges"
-                        }
-                    ]
-                },
-                "email": {
-                    "description": "Email holds the value of the \"email\" field.",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID of the ent.",
-                    "type": "string"
-                },
-                "image_url": {
-                    "description": "ImageURL holds the value of the \"image_url\" field.",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "Role holds the value of the \"role\" field.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/user.Role"
-                        }
-                    ]
-                },
-                "updated_at": {
-                    "description": "UpdatedAt holds the value of the \"updated_at\" field.",
-                    "type": "string"
-                }
-            }
-        },
-        "ent.UserEdges": {
-            "type": "object",
-            "properties": {
-                "account": {
-                    "description": "Account holds the value of the account edge.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/ent.Account"
-                        }
-                    ]
-                }
-            }
-        },
-        "user.Role": {
-            "type": "string",
-            "enum": [
-                "user",
-                "admin",
-                "user"
-            ],
-            "x-enum-varnames": [
-                "DefaultRole",
-                "RoleAdmin",
-                "RoleUser"
-            ]
         }
     },
     "securityDefinitions": {
@@ -495,7 +332,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "UpChat API",
+	Title:            "UpChat API Backend",
 	Description:      "API for UpChat - AI chat application",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

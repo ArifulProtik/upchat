@@ -27,7 +27,7 @@ func (Account) Fields() []ent.Field {
 			Default("email"),
 		field.String("email").Unique().NotEmpty(),
 		field.String("password").Sensitive().NotEmpty(),
-		field.Bool("mail_verified").Default(false),
+		field.Bool("mail_verified").Default(false).StructTag(`json:"mail_verified"`),
 	}
 }
 

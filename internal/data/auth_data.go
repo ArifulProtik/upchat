@@ -14,6 +14,27 @@ type LoginBody struct {
 }
 
 type LoginResponse struct {
-	Token string    `json:"token"`
-	User  *ent.User `json:"user"`
+	Token string       `json:"token"`
+	User  UserResponse `json:"user"`
+}
+
+type LoginData struct {
+	Token string
+	User  *ent.User
+}
+
+type UserResponse struct {
+	BaseModel
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type AccountResponse struct {
+	Provider     string `json:"provider"`
+	MailVerified bool   `json:"mail_verified"`
+}
+
+type GetSessionResponse struct {
+	User    *UserResponse    `json:"user"`
+	Account *AccountResponse `json:"account"`
 }

@@ -1,30 +1,31 @@
 basePath: /api
 definitions:
-  account.Provider:
-    enum:
-    - email
-    - google
-    - github
-    - email
-    - apple
-    type: string
-    x-enum-varnames:
-    - DefaultProvider
-    - ProviderGoogle
-    - ProviderGithub
-    - ProviderEmail
-    - ProviderApple
   controller.ErrorResponse:
     properties:
       error: {}
       status:
         type: integer
     type: object
+  data.AccountResponse:
+    properties:
+      mail_verified:
+        type: boolean
+      provider:
+        type: string
+    type: object
+  data.GetSessionResponse:
+    properties:
+      account:
+        $ref: '#/definitions/data.AccountResponse'
+      user:
+        $ref: '#/definitions/data.UserResponse'
+    type: object
   data.LoginBody:
     properties:
       email:
         type: string
       password:
+        minLength: 6
         type: string
     required:
     - email
@@ -35,7 +36,7 @@ definitions:
       token:
         type: string
       user:
-        $ref: '#/definitions/ent.User'
+        $ref: '#/definitions/data.UserResponse'
     type: object
   data.UserCreateBody:
     properties:
@@ -44,144 +45,30 @@ definitions:
       name:
         type: string
       password:
+        minLength: 6
         type: string
     required:
     - email
     - name
     - password
     type: object
-  ent.Account:
+  data.UserResponse:
     properties:
       created_at:
-        description: CreatedAt holds the value of the "created_at" field.
         type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.AccountEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the AccountQuery when eager-loading is set.
       email:
-        description: Email holds the value of the "email" field.
         type: string
       id:
-        description: ID of the ent.
         type: string
-      mail_verified:
-        description: MailVerified holds the value of the "mail_verified" field.
-        type: boolean
-      provider:
-        allOf:
-        - $ref: '#/definitions/account.Provider'
-        description: Provider holds the value of the "provider" field.
-      updated_at:
-        description: UpdatedAt holds the value of the "updated_at" field.
-        type: string
-      user_id:
-        description: UserID holds the value of the "user_id" field.
-        type: string
-    type: object
-  ent.AccountEdges:
-    properties:
-      sessions:
-        description: Sessions holds the value of the sessions edge.
-        items:
-          $ref: '#/definitions/ent.Session'
-        type: array
-      user:
-        allOf:
-        - $ref: '#/definitions/ent.User'
-        description: User holds the value of the user edge.
-    type: object
-  ent.Session:
-    properties:
-      account_id:
-        description: AccountID holds the value of the "account_id" field.
-        type: string
-      created_at:
-        description: CreatedAt holds the value of the "created_at" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.SessionEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the SessionQuery when eager-loading is set.
-      id:
-        description: ID of the ent.
-        type: string
-      ip_address:
-        description: IPAddress holds the value of the "ip_address" field.
-        type: string
-      token:
-        description: Token holds the value of the "token" field.
+      name:
         type: string
       updated_at:
-        description: UpdatedAt holds the value of the "updated_at" field.
-        type: string
-      user_agent:
-        description: UserAgent holds the value of the "user_agent" field.
         type: string
     type: object
-  ent.SessionEdges:
-    properties:
-      owner:
-        allOf:
-        - $ref: '#/definitions/ent.Account'
-        description: Owner holds the value of the owner edge.
-    type: object
-  ent.User:
-    properties:
-      Name:
-        description: Name holds the value of the "Name" field.
-        type: string
-      created_at:
-        description: CreatedAt holds the value of the "created_at" field.
-        type: string
-      edges:
-        allOf:
-        - $ref: '#/definitions/ent.UserEdges'
-        description: |-
-          Edges holds the relations/edges for other nodes in the graph.
-          The values are being populated by the UserQuery when eager-loading is set.
-      email:
-        description: Email holds the value of the "email" field.
-        type: string
-      id:
-        description: ID of the ent.
-        type: string
-      image_url:
-        description: ImageURL holds the value of the "image_url" field.
-        type: string
-      role:
-        allOf:
-        - $ref: '#/definitions/user.Role'
-        description: Role holds the value of the "role" field.
-      updated_at:
-        description: UpdatedAt holds the value of the "updated_at" field.
-        type: string
-    type: object
-  ent.UserEdges:
-    properties:
-      account:
-        allOf:
-        - $ref: '#/definitions/ent.Account'
-        description: Account holds the value of the account edge.
-    type: object
-  user.Role:
-    enum:
-    - user
-    - admin
-    - user
-    type: string
-    x-enum-varnames:
-    - DefaultRole
-    - RoleAdmin
-    - RoleUser
 info:
   contact: {}
   description: API for UpChat - AI chat application
-  title: UpChat API
+  title: UpChat API Backend
   version: "1.0"
 paths:
   /auth/get-session:
@@ -192,7 +79,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ent.User'
+            $ref: '#/definitions/data.GetSessionResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -272,7 +159,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/ent.User'
+            $ref: '#/definitions/data.UserResponse'
         "400":
           description: Bad Request
           schema:
