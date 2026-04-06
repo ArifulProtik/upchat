@@ -1,15 +1,16 @@
 package main
 
 import (
+	"context"
+	"log"
+	"log/slog"
+	"os"
+
 	"ArifulProtik/UpChat/internal"
 	"ArifulProtik/UpChat/internal/controller"
 	"ArifulProtik/UpChat/internal/ent"
 	"ArifulProtik/UpChat/internal/ent/migrate"
 	"ArifulProtik/UpChat/internal/service"
-	"context"
-	"log"
-	"log/slog"
-	"os"
 
 	_ "ArifulProtik/UpChat/internal/docs"
 
@@ -23,7 +24,7 @@ import (
 // @securityDefinitions.apikey	BearerAuth
 // @in							header
 // @name						Authorization
-// @description				Enter "Bearer {token}"
+// @description				Enter "Bearer {token}".
 func main() {
 	ctx := context.Background()
 	config, err := internal.LoadConfig()

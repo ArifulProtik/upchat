@@ -1,14 +1,15 @@
 package service
 
 import (
-	"ArifulProtik/UpChat/internal/data"
-	"ArifulProtik/UpChat/internal/ent"
-	"ArifulProtik/UpChat/internal/ent/session"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+
+	"ArifulProtik/UpChat/internal/data"
+	"ArifulProtik/UpChat/internal/ent"
+	"ArifulProtik/UpChat/internal/ent/session"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -36,7 +37,7 @@ func (s *Service) HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func (s *Service) VerifyPassword(password string, hashedPassword string) error {
+func (s *Service) VerifyPassword(password, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 

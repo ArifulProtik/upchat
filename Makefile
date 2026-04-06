@@ -16,8 +16,14 @@ generate: ## Generate ent code
 build: ## Compile the binary
 	go build -o bin/$(BINARY_NAME) ./cmd/api
 
+fmt: ## Format the code
+	golangci-lint fmt
+
 run: build ## Build and run the application
 	./bin/$(BINARY_NAME) & (cd ui && bun run dev)
+
+lint: ## Run golangci-lint (requires installation)
+	golangci-lint run
 
 schema: ## Generate new ent schema (usage: make schema schema_name=User)
 	go tool ent new $(schema_name) --target ./internal/ent/schema

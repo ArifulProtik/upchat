@@ -1,11 +1,12 @@
 package controller
 
 import (
+	"net/http"
+	"strings"
+
 	"ArifulProtik/UpChat/internal/controller/middleware"
 	"ArifulProtik/UpChat/internal/data"
 	"ArifulProtik/UpChat/internal/ent"
-	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -86,7 +87,8 @@ func (c *Controller) LogIn(ctx *gin.Context) {
 		})
 		return
 	}
-	if err := c.service.VerifyPassword(body.Password, account.Password); err != nil {
+	err = c.service.VerifyPassword(body.Password, account.Password)
+	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, &ErrorResponse{
 			Status: http.StatusUnauthorized,
 			Error:  "Wrong email or password.",
@@ -151,7 +153,7 @@ func (c *Controller) LogOut(ctx *gin.Context) {
 //	@Security	BearerAuth
 //	@Router		/auth/get-session [get]
 func (c *Controller) GetSession(ctx *gin.Context) {
-	user_id := ctx.MustGet(middleware.UserIDKey).(string)
+	user_id := ctx.MustGet(middleware.UserIDKey).(string) //nolint:errcheck
 	c.logger.Info(user_id)
 	userdata, err := c.service.FindAccountByID(ctx.Request.Context(), user_id)
 	if err != nil {

@@ -1,54 +1,74 @@
 package service
 
 import (
+	"context"
+	"errors"
+	"fmt"
+
 	"ArifulProtik/UpChat/internal/data"
 	"ArifulProtik/UpChat/internal/ent"
 	"ArifulProtik/UpChat/internal/ent/account"
 	"ArifulProtik/UpChat/internal/ent/user"
-	"context"
-	"errors"
 )
 
 func (s *Service) CreateUser(
 	ctx context.Context,
 	body data.UserCreateBody,
 ) (*ent.User, error) {
-	exists, _ := s.FIndUserByEmail(ctx, body.Email)
+	exists, err := s.FIndUserByEmail(ctx, body.Email)
+	if err != nil {
+		return nil, err
+	}
 	if exists != nil {
 		return nil, errors.New("user already exists with this email")
 	}
+
 	password, err := s.HashPassword(body.Password)
 	if err != nil {
 		return nil, err
 	}
+
 	tx, err := s.db.Tx(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// Ensure rollback safety
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			err = tx.Rollback()
 			panic(v)
 		}
 	}()
+
 	user, err := tx.User.Create().
 		SetName(body.Name).
 		SetEmail(body.Email).
 		Save(ctx)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return nil, fmt.Errorf("tx err: %w, rollback err: %w", err, rbErr)
+		}
 		return nil, err
 	}
+
 	_, err = tx.Account.Create().
 		SetEmail(body.Email).
 		SetPassword(password).
 		SetUser(user).
 		Save(ctx)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			return nil, fmt.Errorf("tx err: %w, rollback err: %w", err, rbErr)
+		}
 		return nil, err
 	}
-	tx.Commit()
+
+	// IMPORTANT: check commit error
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 

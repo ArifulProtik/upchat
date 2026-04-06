@@ -6,6 +6,10 @@
 	import { resolve } from '$app/paths';
 	import { signupSchema, type SignupSchema } from '$lib/types/auth-schema';
 	import { z } from 'zod';
+	import { useSignup } from '$lib/api/auth';
+	import { ApiError } from '$lib/api/client';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
 
 	let formData: SignupSchema = $state({
 		name: '',
@@ -19,6 +23,8 @@
 		password: false
 	});
 
+	let serverError = $state('');
+
 	let errors = $derived.by(() => {
 		const result = signupSchema.safeParse(formData);
 		if (result.success) return {};
@@ -30,15 +36,31 @@
 		};
 	});
 
+	const signup = useSignup();
+
 	const handleSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
 		touchedField.name = true;
 		touchedField.email = true;
 		touchedField.password = true;
+		serverError = '';
+
 		const result = signupSchema.safeParse(formData);
-		if (result.success) {
-			console.log(result.data);
-		}
+		if (!result.success) return;
+
+		signup.mutate(result.data, {
+			onSuccess: () => {
+				toast.success('Account created! Please sign in.');
+				goto(resolve('/signin'));
+			},
+			onError: (error) => {
+				if (error instanceof ApiError) {
+					serverError = error.message;
+				} else {
+					toast.error('Something went wrong. Please try again.');
+				}
+			}
+		});
 	};
 </script>
 
@@ -52,6 +74,11 @@
 	<Card.Content>
 		<form onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-6">
+				{#if serverError}
+					<p class="text-center text-sm text-destructive">
+						{serverError}
+					</p>
+				{/if}
 				<div class="grid gap-2">
 					<Label for="name">Name</Label>
 					<Input
@@ -60,6 +87,7 @@
 						placeholder="John Doe"
 						bind:value={formData.name}
 						oninput={() => (touchedField.name = true)}
+						disabled={signup.isPending}
 					/>
 					{#if errors.name}
 						<p class="text-destructive">{errors.name}</p>
@@ -73,6 +101,7 @@
 						placeholder="m@example.com"
 						bind:value={formData.email}
 						oninput={() => (touchedField.email = true)}
+						disabled={signup.isPending}
 					/>
 					{#if errors.email}
 						<p class="text-destructive">{errors.email}</p>
@@ -85,12 +114,19 @@
 						type="password"
 						bind:value={formData.password}
 						oninput={() => (touchedField.password = true)}
+						disabled={signup.isPending}
 					/>
 					{#if errors.password}
 						<p class="text-destructive">{errors.password}</p>
 					{/if}
 				</div>
-				<Button type="submit" class="w-full">Sign Up</Button>
+				<Button type="submit" class="w-full" disabled={signup.isPending}>
+					{#if signup.isPending}
+						Creating account...
+					{:else}
+						Sign Up
+					{/if}
+				</Button>
 			</div>
 		</form>
 	</Card.Content>

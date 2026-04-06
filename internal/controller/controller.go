@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"ArifulProtik/UpChat/internal/controller/middleware"
-	"ArifulProtik/UpChat/internal/service"
 	"log/slog"
 	"net/http"
+
+	"ArifulProtik/UpChat/internal/controller/middleware"
+	"ArifulProtik/UpChat/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"

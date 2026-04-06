@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"ArifulProtik/UpChat/internal/service"
 	"log/slog"
+
+	"ArifulProtik/UpChat/internal/service"
 )
 
 const UserIDKey = "user_id"

@@ -1,8 +1,9 @@
 package service
 
 import (
-	"ArifulProtik/UpChat/internal/ent"
 	"log/slog"
+
+	"ArifulProtik/UpChat/internal/ent"
 )
 
 type Service struct {

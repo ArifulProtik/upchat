@@ -1,4 +1,7 @@
-export const handle = async ({ event, resolve }) => {
-	console.log('atat');
+import type { Handle } from '@sveltejs/kit';
+
+export const handle: Handle = async ({ event, resolve }) => {
+	const token = event.cookies.get('auth_token');
+	event.locals.token = token;
 	return resolve(event);
 };

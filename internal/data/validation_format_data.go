@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 
@@ -17,21 +18,22 @@ type FieldError struct {
 }
 
 func FormatValidationErrors(err error, obj any) ErrorResponse {
-	var errors []FieldError
+	var fieldErrors []FieldError
 
-	ve, ok := err.(validator.ValidationErrors)
+	var ve validator.ValidationErrors
+	ok := errors.As(err, &ve)
 	if !ok {
-		return ErrorResponse{Errors: errors}
+		return ErrorResponse{Errors: fieldErrors}
 	}
 
 	for _, fe := range ve {
-		errors = append(errors, FieldError{
+		fieldErrors = append(fieldErrors, FieldError{
 			Field:   getJSONFieldName(fe, obj),
 			Message: getErrorMessage(fe),
 		})
 	}
 
-	return ErrorResponse{Errors: errors}
+	return ErrorResponse{Errors: fieldErrors}
 }
 
 func getJSONFieldName(fe validator.FieldError, obj any) string {

@@ -34,8 +34,9 @@ func New(config *Config) *Server {
 
 func (s *Server) Run() {
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", s.config.Port),
-		Handler: s.engine.Handler(),
+		Addr:              fmt.Sprintf(":%s", s.config.Port),
+		Handler:           s.engine.Handler(),
+		ReadHeaderTimeout: time.Second * 10,
 	}
 	go func() {
 		if err := server.ListenAndServe(); err != nil &&
